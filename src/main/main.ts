@@ -11,9 +11,12 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, session } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import axios from 'axios';
+import Store, { Schema } from 'electron-store';
+
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -80,7 +83,10 @@ const createWindow = async () => {
     height: 728,
     icon: getAssetPath('icon.png'),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: false,
+      // preload: path.join(__dirname, 'preload.js'),
     },
   });
 
@@ -136,4 +142,89 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
+});
+
+type StoreType = {
+  user_info: {
+    cookie: Electron.Cookie[];
+    user_name: string;
+    user_pass: string;
+  };
+};
+const schema: Schema<StoreType> = {
+  user_info: {
+    type: 'object',
+    properties: {
+      cookie: {
+        type: 'array',
+      },
+      user_name: {
+        type: 'string',
+      },
+      user_pass: {
+        type: 'string',
+      },
+    },
+  },
+};
+
+const store = new Store<StoreType>({ schema, encryptionKey: 'min' });
+
+ipcMain.on('store_cookie', (_, args) => {
+  session.defaultSession.cookies
+    .get({ url: 'http://zhjw.scu.edu.cn' })
+    .then((cookies) => {
+      store.set('user_info', {
+        cookie: cookies,
+        user_name: args[0],
+        user_pass: args[1],
+      });
+      return 0;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
+Store.initRenderer();
+ipcMain.on('test_cookie', (event) => {
+  const userCookies: Electron.Cookie[] = store.get('user_info.cookie', []);
+  const cookieLogin = userCookies.filter(
+    (value: Electron.Cookie) => value.name === 'JSESSIONID'
+  );
+  if (userCookies !== [] && cookieLogin !== []) {
+    console.log(cookieLogin);
+    axios({
+      method: 'get',
+      url: 'http://zhjw.scu.edu.cn/',
+      headers: {
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'Cache-Control': 'max-age=0',
+        Cookie: `${cookieLogin[0].name}=${cookieLogin[0].value}`,
+      },
+    })
+      .then((response) => {
+        if (response.data.indexOf('成绩查询') !== -1) {
+          console.log('Cookie using');
+          userCookies.forEach((cookieItem) => {
+            session.defaultSession.cookies.set(
+              Object.assign(cookieItem, { url: 'http://zhjw.scu.edu.cn' })
+            );
+          });
+          event.reply('test_cookie_reply', true);
+        } else {
+          console.log('cookie over');
+          event.reply('test_cookie_reply', false);
+        }
+        return 0;
+      })
+      .catch(() => {
+        console.log('cookie test error');
+        event.reply('test_cookie_reply', false);
+      });
+  }
 });

@@ -1,0 +1,17 @@
+.login-form {
+  max-width: 400px;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+.verify-code-input {
+  float: left;
+  vertical-align: middle;
+}
+.verify-code-img {
+  max-width: 80px;
+  vertical-align: middle;
+}
+.login-form-button {
+  margin-left: 40%;
+}

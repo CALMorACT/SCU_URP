@@ -1,51 +1,24 @@
+/*
+ * @Author: holakk
+ * @Date: 2021-09-14 21:44:51
+ * @LastEditors: holakk
+ * @LastEditTime: 2021-09-16 10:26:59
+ * @Description: file content
+ */
 import React from 'react';
-import { MemoryRouter as Router, Switch, Route } from 'react-router-dom';
-import icon from '../../assets/icon.svg';
+import { MemoryRouter as Router, Route } from 'react-router-dom';
+import { RecoilRoot } from 'recoil';
+import Login from './component/login';
+import MainPanel from './component/mainPanel';
 import './App.global.css';
-
-const Hello = () => {
-  return (
-    <div>
-      <div className="Hello">
-        <img width="200px" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
-      </div>
-    </div>
-  );
-};
 
 export default function App() {
   return (
-    <Router>
-      <Switch>
-        <Route path="/" component={Hello} />
-      </Switch>
-    </Router>
+    <RecoilRoot>
+      <Router>
+        <Route exact path="/" component={Login} />
+        <Route path="/mainPanel" component={MainPanel} />
+      </Router>
+    </RecoilRoot>
   );
 }
