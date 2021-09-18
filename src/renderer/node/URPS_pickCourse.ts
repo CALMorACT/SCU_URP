@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-02-03 22:14:31
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-16 21:49:26
+ * @LastEditTime: 2021-09-19 00:15:40
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\node\URPS_pickCourse.js
  */
 import qs from 'qs';
@@ -11,7 +11,7 @@ import { message } from 'antd';
 
 import { Course, axiosURPS, urls, CourseWait, PollState } from './baseGen';
 
-enum PoolStatus {
+export enum PoolStatus {
   OK,
   Wait,
   DIE,
@@ -59,8 +59,9 @@ class CourseInfoGrabbing {
           response.status === 200 &&
           response.data.indexOf('成绩查询') !== -1
         ) {
-          const regexIn = /欢迎您，<\/small>(.+)[\s\S]+<\/span>/gm;
+          const regexIn = /欢迎您.<\/small>[\s\S]{13}(.+)\n/gm;
           const regResult = regexIn.exec(response.data);
+          console.log(regResult);
           if (regResult) {
             [, this.user_name] = regResult;
           } else {
@@ -71,12 +72,13 @@ class CourseInfoGrabbing {
       })
       .catch((error) => {
         message.error('登录失效');
+        // eslint-disable-next-line no-console
         console.log(`error here ${error}`);
       });
   }
 
-  config(refresh_time: string) {
-    this.poll_interval = parseInt(refresh_time, 10);
+  config(refresh_time: number) {
+    this.poll_interval = refresh_time;
     this.set_user_name();
   }
 
@@ -92,12 +94,12 @@ class CourseInfoGrabbing {
       const indexResponse = await this.axios_URPS.get(
         this.urls.All_course_index
       );
-      // 验证健康性
-      if (indexResponse.data.indexOf('自由选课') === -1) {
-        throw new Error(
-          '[无法进入页面]：当前非选课阶段，或者教务处网站挂了，或者你的网络不行'
-        );
-      }
+      // TODO: 验证健康性，利用这个过程判断是否选课时间以及提供课程查询服务
+      // if (indexResponse.data.indexOf('自由选课') === -1) {
+      //   throw new Error(
+      //     '[无法进入页面]：当前非选课阶段，或者教务处网站挂了，或者你的网络不行'
+      //   );
+      // }
       // 计算token
       const temp = indexResponse.data.indexOf('id="tokenValue"');
       this.token = indexResponse.data.substring(temp + 23, temp + 55);
@@ -119,17 +121,15 @@ class CourseInfoGrabbing {
       }
       throw new Error('无法获取搜索结果');
     } catch (error) {
-      message.error(`无法找到课程: ${error}`);
-      return error;
+      throw new Error(`无法找到课程: ${error}`);
     }
   }
 
   course_add_listener(course: Course) {
-    const aimCourseDict: CourseWait = {
-      course_info: course,
+    const aimCourseDict: CourseWait = Object.assign(course, {
       poll_state: PollState.Preparing,
       poll_time: 0,
-    };
+    });
     this.course_pool.push(aimCourseDict);
   }
 
@@ -140,11 +140,13 @@ class CourseInfoGrabbing {
   }
 
   update_view_course_pool(
-    oldView: CourseWait[],
-    setOldView: (x: CourseWait[]) => void
+    view_course_pool: CourseWait[],
+    set_view_course_pool: (x: CourseWait[]) => void
   ) {
-    if (oldView !== this.course_pool) {
-      setOldView(this.course_pool);
+    if (this.course_pool === []) {
+      this.course_pool = view_course_pool;
+    } else if (this.course_pool !== view_course_pool) {
+      set_view_course_pool(this.course_pool);
     }
   }
 
@@ -153,28 +155,30 @@ class CourseInfoGrabbing {
     needRemoveIndex: number[]
   ): Promise<number> {
     let postInfo = {};
-    await this.find_course(this.course_pool[courseIndex].course_info.course_num)
+    const findResult = await this.find_course(
+      this.course_pool[courseIndex].course_num
+    )
       .then((results) => {
+        let courseMargin = 0;
         if (typeof results !== 'string') {
-          this.pool_status = PoolStatus.OK;
           results.forEach(
             (searchResult: {
               kcm: string;
               kch: string;
               kxh: string;
               bkskyl: number;
-              zxjxjhh: any;
+              zxjxjhh: string;
             }) => {
               if (
-                this.course_pool[courseIndex].course_info.course_name ===
+                this.course_pool[courseIndex].course_name ===
                   searchResult.kcm &&
-                this.course_pool[courseIndex].course_info.course_num ===
-                  searchResult.kch &&
-                this.course_pool[courseIndex].course_info.course_sort ===
-                  searchResult.kxh
+                this.course_pool[courseIndex].course_num === searchResult.kch &&
+                this.course_pool[courseIndex].course_sort === searchResult.kxh
               ) {
-                this.course_pool[courseIndex].course_info.course_remain =
+                // 课余量赋值以及影响fullfilled的返回值
+                this.course_pool[courseIndex].course_remain =
                   searchResult.bkskyl;
+                courseMargin = searchResult.bkskyl;
                 // 检查课余量
                 if (searchResult.bkskyl > 0) {
                   let zxykName = '';
@@ -197,37 +201,40 @@ class CourseInfoGrabbing {
                 }
               } else {
                 this.course_pool[courseIndex].poll_state = PollState.NoCourse;
+                throw new Error('查无此课程');
               }
             }
           );
         } else {
-          this.pool_status = PoolStatus.DIE;
           throw new Error('查询状态失败');
         }
-        return 'no using';
+        return courseMargin;
       })
       .catch((error) => {
-        throw new Error(error.massage);
+        needRemoveIndex.push(courseIndex);
+        throw new Error(`查询课程异常: ${error}`);
       });
-
-    await this.axios_URPS
-      .post(this.urls.free_pick_course_submit, qs.stringify(postInfo))
-      .then((response) => {
-        if (response.status !== 200) {
-          throw new Error('网络错误');
-        }
-        if (response.data.indexOf('ok') !== -1) {
+    if (findResult !== 0) {
+      await this.axios_URPS
+        .post(this.urls.free_pick_course_submit, qs.stringify(postInfo))
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error('网络错误');
+          }
+          if (response.data.indexOf('ok') !== -1) {
+            needRemoveIndex.push(courseIndex);
+            this.course_pool[courseIndex].poll_state = PollState.Success;
+          } else {
+            this.course_pool[courseIndex].poll_state = PollState.NoMatch;
+            throw new Error('不符合课程限制');
+          }
+          return 0;
+        })
+        .catch((error) => {
           needRemoveIndex.push(courseIndex);
-          this.course_pool[courseIndex].poll_state = PollState.Success;
-        } else {
-          this.course_pool[courseIndex].poll_state = PollState.NoMatch;
-        }
-        return 0;
-      })
-      .catch((error) => {
-        this.pool_status = PoolStatus.DIE;
-        throw new Error(`抢课异常: ${error}`);
-      });
+          throw new Error(`抢课异常: ${error}`);
+        });
+    }
     this.course_pool[courseIndex].poll_time += 1;
     return 0;
   }
@@ -239,14 +246,24 @@ class CourseInfoGrabbing {
       throw new Error('课程池中没有课程');
     }
     if (this.course_pool !== []) {
+      this.pool_status = PoolStatus.OK;
+      // 课程异常或者课程抢课成功的课程索引，不包括确认无课余量的课程
       const needRemoveIndex: number[] = [];
       const allPromise: Promise<number>[] = [];
       this.course_pool.forEach((_, courseIndex: number) => {
         const promiseThis = this.get_course(courseIndex, needRemoveIndex);
         allPromise.push(promiseThis);
       });
-      await Promise.all(allPromise);
-      this.courses_remove_listener(needRemoveIndex);
+      const allResults = await Promise.allSettled(allPromise);
+      if (
+        allResults.filter((result) => result.status !== 'rejected').length === 0
+      ) {
+        this.pool_status = PoolStatus.DIE;
+      }
+      // 直接删除
+      // needRemoveIndex.forEach((value) => {
+      //   this.course_pool.splice(value, 1);
+      // });
     }
   }
 }

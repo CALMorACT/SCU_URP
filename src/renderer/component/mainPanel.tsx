@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-02-10 18:18:44
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-15 22:40:57
+ * @LastEditTime: 2021-09-17 09:47:40
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\mainPanel.js
  */
 import React from 'react';
@@ -12,8 +12,8 @@ import { Tabs } from 'antd';
 import '../App.global.css';
 
 import { CourseList } from './CourseSearch';
-import { AimsCourseList } from './aimsCourseList';
-import { Manual } from './manual';
+import { AimsCourseList } from './CoursePoll';
+import { Manual } from './Manual';
 
 const { TabPane } = Tabs;
 

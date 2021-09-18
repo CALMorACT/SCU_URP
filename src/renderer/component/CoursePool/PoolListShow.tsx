@@ -2,64 +2,34 @@
  * @Author: holakk
  * @Date: 2021-03-18 22:08:44
  * @LastEditors: holakk
- * @LastEditTime: 2021-06-07 20:11:40
+ * @LastEditTime: 2021-09-18 22:43:27
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\CoursePool\PoolListShow.js
  */
-import React, { useState } from 'react';
-import { message, Table, Button } from 'antd';
+import React from 'react';
+import { Table, Button } from 'antd';
+import { useRecoilState, useRecoilValue } from 'recoil';
+
+import { PollState } from '../../node/baseGen';
+import { coursePool } from '../../node/stateMange';
 
 const { Column, ColumnGroup } = Table;
 
 // 显示抢课池中课程
-export function CoursePoolListShow(props) {
-  const [course_pool, setCoursePool] = useState(
-    Object.keys(props.aims_courses).map((it) => props.aims_courses[it])
-  );
-  const [selectCourse, setSelectCourse] = useState([]);
-  const selectRow = (record) => {
-    const selectedRowKeys = [...selectCourse];
-    if (selectedRowKeys.indexOf(record.key) >= 0) {
-      selectedRowKeys.spice(selectedRowKeys.indexOf(record.key), 1);
-    } else {
-      selectedRowKeys.push(record.key);
-    }
-    setSelectCourse(selectedRowKeys);
-    props.set_course_remove_keys(selectedRowKeys);
-  };
+export function CoursePoolListShow() {
+  const Pool = useRecoilValue(coursePool);
+  console.log(Pool);
   return (
     <div>
       <Table
         title={() => (
           <div>
             抢课列表
-            <Button
-              type="text"
-              onClick={() => {
-                const temp = Object.keys(props.aims_courses).map(
-                  (it) => props.aims_courses[it]
-                );
-                if (course_pool !== temp) {
-                  setCoursePool(temp);
-                }
-              }}
-            >
+            <Button type="text" onClick={() => {}}>
               刷新
             </Button>
           </div>
         )}
-        dataSource={course_pool}
-        rowSelection={{
-          type: selectCourse,
-          onChange: (selectedRowKeys) => {
-            setSelectCourse(selectedRowKeys);
-            props.set_course_remove_keys(selectedRowKeys);
-          },
-        }}
-        onRow={(record) => ({
-          onClick: () => {
-            this.selectRow(record);
-          },
-        })}
+        dataSource={Pool}
       >
         <Column title="课程名" dataIndex="course_name" key="course_name" />
         <Column
@@ -75,10 +45,13 @@ export function CoursePoolListShow(props) {
             title="周数"
             dataIndex="course_time_week"
             key="course_time_week"
-            render={(value, row, row_index) => {
+            render={(value, _, row_index) => {
               const obj = {
-                children: value.map((item, index) => (
-                  <div key={`course_time_week${row_index}${index}`}>{item}</div>
+                children: value.map((item: string, index: number) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <div key={`course_time_week_${row_index}_${index}`}>
+                    {item}
+                  </div>
                 )),
                 props: {},
               };
@@ -89,10 +62,13 @@ export function CoursePoolListShow(props) {
             title="星期数"
             dataIndex="course_time_day"
             key="course_time_day"
-            render={(value, row, row_index) => {
+            render={(value, _, row_index) => {
               const obj = {
-                children: value.map((item, index) => (
-                  <div key={`course_time_day${row_index}${index}`}>{item}</div>
+                children: value.map((item: string, index: number) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <div key={`course_time_day_${row_index}_${index}`}>
+                    {item}
+                  </div>
                 )),
                 props: {},
               };
@@ -103,10 +79,11 @@ export function CoursePoolListShow(props) {
             title="节数"
             dataIndex="course_time_section"
             key="course_time_section"
-            render={(value, row, row_index) => {
+            render={(value, _, row_index) => {
               const obj = {
-                children: value.map((item, index) => (
-                  <div key={`course_time_section${row_index}${index}`}>
+                children: value.map((item: string, index: number) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <div key={`course_time_section_${row_index}_${index}`}>
                     {item}
                   </div>
                 )),
@@ -121,18 +98,20 @@ export function CoursePoolListShow(props) {
           title="抢课结果"
           dataIndex="poll_result"
           key="poll_result"
-          render={(text, row, index) => {
+          render={(text) => {
             switch (text) {
-              case 4:
-                return '抢课失败';
-              case 3:
+              case PollState.NoCourse:
                 return '无此课程';
-              case 2:
+              case PollState.NoMargin:
                 return '无课余量';
-              case 1:
+              case PollState.NoMatch:
+                return '不符合限制';
+              case PollState.Preparing:
                 return '准备抢课';
-              case 0:
+              case PollState.Success:
                 return '抢课成功';
+              default:
+                return 'none';
             }
           }}
         />
@@ -141,16 +120,12 @@ export function CoursePoolListShow(props) {
   );
 }
 // 移出课程
-export function RemoveCoursePoolButton(props) {
+export function RemoveCoursePoolButton() {
   return (
-    <Button
-      type="primary"
-      shape="round"
-      size="large"
-      onClick={props.removePool}
-      disabled={props.disabled}
-    >
+    <Button type="primary" shape="round" size="large">
       删除
     </Button>
   );
 }
+
+export default { CoursePoolListShow, RemoveCoursePoolButton };

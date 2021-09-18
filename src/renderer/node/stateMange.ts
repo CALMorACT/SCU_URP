@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-09-16 11:52:25
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-16 20:00:23
+ * @LastEditTime: 2021-09-18 14:08:41
  * @Description: file content
  */
 import { atom } from 'recoil';
@@ -25,6 +25,16 @@ export const searchKey = atom({
 export const coursePool = atom({
   key: 'coursePool',
   default: [] as CourseWait[],
+});
+
+export const isPolling = atom({
+  key: 'isPolling',
+  default: false,
+});
+
+export const isSelectingTime = atom({
+  key: 'isSelectingTime',
+  default: false,
 });
 
 export default { searchResults, selectCourses, searchKey };

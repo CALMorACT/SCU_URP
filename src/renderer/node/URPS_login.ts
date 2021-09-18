@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-02-06 17:30:37
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-16 16:57:57
+ * @LastEditTime: 2021-09-17 10:58:28
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\node\URPS_login.js
  */
 
@@ -12,7 +12,7 @@ import { ipcRenderer } from 'electron';
 // import { ContactsFilled } from '@ant-design/icons';
 import CryptoJS from 'crypto-js';
 
-import { urls } from './uData';
+import { urls, axiosURPS } from './baseGen';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function refreshVerifyCode(event: any = null) {

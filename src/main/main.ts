@@ -11,14 +11,13 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, session } from 'electron';
+import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import axios from 'axios';
-import Store, { Schema } from 'electron-store';
 
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { resolveHtmlPath, store } from './util';
 
 export default class AppUpdater {
   constructor() {
@@ -144,35 +143,9 @@ app.on('activate', () => {
   if (mainWindow === null) createWindow();
 });
 
-type StoreType = {
-  user_info: {
-    cookie: Electron.Cookie[];
-    user_name: string;
-    user_pass: string;
-  };
-};
-const schema: Schema<StoreType> = {
-  user_info: {
-    type: 'object',
-    properties: {
-      cookie: {
-        type: 'array',
-      },
-      user_name: {
-        type: 'string',
-      },
-      user_pass: {
-        type: 'string',
-      },
-    },
-  },
-};
-
-const store = new Store<StoreType>({ schema, encryptionKey: 'min' });
-
 ipcMain.on('store_cookie', (_, args) => {
-  session.defaultSession.cookies
-    .get({ url: 'http://zhjw.scu.edu.cn' })
+  mainWindow?.webContents.session.cookies
+    .get({})
     .then((cookies) => {
       store.set('user_info', {
         cookie: cookies,
@@ -186,14 +159,12 @@ ipcMain.on('store_cookie', (_, args) => {
     });
 });
 
-Store.initRenderer();
 ipcMain.on('test_cookie', (event) => {
   const userCookies: Electron.Cookie[] = store.get('user_info.cookie', []);
   const cookieLogin = userCookies.filter(
     (value: Electron.Cookie) => value.name === 'JSESSIONID'
   );
   if (userCookies !== [] && cookieLogin !== []) {
-    console.log(cookieLogin);
     axios({
       method: 'get',
       url: 'http://zhjw.scu.edu.cn/',
@@ -209,12 +180,31 @@ ipcMain.on('test_cookie', (event) => {
     })
       .then((response) => {
         if (response.data.indexOf('成绩查询') !== -1) {
+          console.log(userCookies);
           console.log('Cookie using');
+          mainWindow?.webContents.session.cookies.remove(
+            'http://zhjw.scu.edu.cn',
+            'JSESSIONID'
+          );
           userCookies.forEach((cookieItem) => {
-            session.defaultSession.cookies.set(
-              Object.assign(cookieItem, { url: 'http://zhjw.scu.edu.cn' })
+            const {
+              secure = false,
+              domain = '',
+              path: thispath = '',
+            } = cookieItem;
+            mainWindow?.webContents.session.cookies.set(
+              Object.assign(cookieItem, {
+                url:
+                  (secure ? 'https://' : 'http://') +
+                  domain.replace(/^\./, '') +
+                  thispath,
+              })
             );
           });
+          // mainWindow?.webContents.session.cookies.get({}).then((cookies) => {
+          //   console.log(cookies);
+          //   return 0;
+          // });
           event.reply('test_cookie_reply', true);
         } else {
           console.log('cookie over');

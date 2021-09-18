@@ -8,8 +8,8 @@
 import React from 'react';
 import { MemoryRouter as Router, Route } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
-import Login from './component/login';
-import MainPanel from './component/mainPanel';
+import Login from './component/Login';
+import MainPanel from './component/MainPanel';
 import './App.global.css';
 
 export default function App() {

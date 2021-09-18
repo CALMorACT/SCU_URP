@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-09-16 10:34:13
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-16 22:05:07
+ * @LastEditTime: 2021-09-18 13:03:47
  * @Description: file content
  */
 import React from 'react';
@@ -89,7 +89,13 @@ function getSearchResult(
       return 'ok';
     })
     .catch((error) => {
-      message.error('搜索失败，请尝试重启或重新登录', 2);
+      setTimeout(() => {
+        message.error({
+          content: '搜索失败，请尝试重启或重新登录',
+          key: 'search',
+          duration: 2,
+        });
+      }, 500);
       console.log(`error for finding courses ${error}`);
     });
 }

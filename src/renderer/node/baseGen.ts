@@ -2,13 +2,13 @@
  * @Author: holakk
  * @Date: 2021-05-30 20:40:09
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-16 21:45:59
+ * @LastEditTime: 2021-09-18 22:04:28
  * @Description: file content
  */
 import axios from 'axios';
-import Store from 'electron-store';
+import { store } from '../../main/util';
 
-export const storeUser = new Store();
+export const storeUser = store;
 
 export const axiosURPS = axios.create({
   baseURL: 'http://zhjw.scu.edu.cn',
@@ -43,8 +43,7 @@ export enum PollState {
   Success, // 抢课成功
 }
 
-export interface CourseWait {
-  course_info: Course;
+export interface CourseWait extends Course {
   poll_state: PollState;
   poll_time: number;
   // poll_spend: number;
