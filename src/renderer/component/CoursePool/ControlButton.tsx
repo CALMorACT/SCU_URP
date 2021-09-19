@@ -2,12 +2,12 @@
  * @Author: holakk
  * @Date: 2021-03-18 22:09:21
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-18 23:16:16
+ * @LastEditTime: 2021-09-19 18:02:03
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\CoursePool\ControlPoll.js
  */
 import React from 'react';
 import { Button, message } from 'antd';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 
 import { coursePicker, PoolStatus } from '../../node/URPS_pickCourse';
 import { isPolling, coursePool } from '../../node/stateMange';

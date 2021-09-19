@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-09-16 10:34:13
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 12:20:37
+ * @LastEditTime: 2021-09-19 16:19:01
  * @Description: file content
  */
 import React from 'react';
@@ -73,6 +73,7 @@ function getSearchResult(
               course_college: unset_course.kkxsjc,
 
               course_limit: unset_course.xkxzsm,
+              // TODO: 根据教务系统生成禁选情况
               course_unable: false,
               course_selected: false,
             });

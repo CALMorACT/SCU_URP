@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-09-16 11:52:25
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 12:38:08
+ * @LastEditTime: 2021-09-19 18:43:06
  * @Description: file content
  */
 import { atom, selector } from 'recoil';
@@ -34,8 +34,8 @@ export const isPolling = atom({
   default: false,
 });
 
-export const isSelectingTime = atom({
-  key: 'isSelectingTime',
+export const isCourseSelectingTime = atom({
+  key: 'isCourseSelectingTime',
   default: false,
 });
 

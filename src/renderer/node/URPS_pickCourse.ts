@@ -2,11 +2,11 @@
  * @Author: holakk
  * @Date: 2021-02-03 22:14:31
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 00:15:40
+ * @LastEditTime: 2021-09-19 21:02:28
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\node\URPS_pickCourse.js
  */
 import qs from 'qs';
-import { AxiosInstance } from 'axios';
+import { AxiosInstance, AxiosResponse } from 'axios';
 import { message } from 'antd';
 
 import { Course, axiosURPS, urls, CourseWait, PollState } from './baseGen';
@@ -59,7 +59,7 @@ class CourseInfoGrabbing {
           response.status === 200 &&
           response.data.indexOf('成绩查询') !== -1
         ) {
-          const regexIn = /欢迎您.<\/small>[\s\S]{13}(.+)\n/gm;
+          const regexIn = /欢迎您.<\/small>\s+(.+)/gm;
           const regResult = regexIn.exec(response.data);
           console.log(regResult);
           if (regResult) {
@@ -73,13 +73,27 @@ class CourseInfoGrabbing {
       .catch((error) => {
         message.error('登录失效');
         // eslint-disable-next-line no-console
-        console.log(`error here ${error}`);
+        console.log(`登录异常: ${error}`);
       });
   }
 
   config(refresh_time: number) {
     this.poll_interval = refresh_time;
     this.set_user_name();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getIsSelectingTime(): Promise<[boolean, AxiosResponse<any>]> {
+    const indexResponse = await this.axios_URPS.get(this.urls.All_course_index);
+    // TODO: 验证健康性，利用这个过程判断是否选课时间以及提供课程查询服务
+    if (indexResponse.data.indexOf('对不起') !== -1) {
+      message.warn('当前非选课阶段，仅可以查询或加入课程池准备抢');
+      return [false, indexResponse];
+    }
+    if (indexResponse.data.indexOf('自由选课') !== -1) {
+      return [true, indexResponse];
+    }
+    throw new Error('[无法进入页面]：较大可能教务处网站挂了，或者你的网络不行');
   }
 
   async find_course(course_keyword: string) {
@@ -91,15 +105,7 @@ class CourseInfoGrabbing {
       kclbdm: '',
     };
     try {
-      const indexResponse = await this.axios_URPS.get(
-        this.urls.All_course_index
-      );
-      // TODO: 验证健康性，利用这个过程判断是否选课时间以及提供课程查询服务
-      // if (indexResponse.data.indexOf('自由选课') === -1) {
-      //   throw new Error(
-      //     '[无法进入页面]：当前非选课阶段，或者教务处网站挂了，或者你的网络不行'
-      //   );
-      // }
+      const [, indexResponse] = await this.getIsSelectingTime();
       // 计算token
       const temp = indexResponse.data.indexOf('id="tokenValue"');
       this.token = indexResponse.data.substring(temp + 23, temp + 55);
@@ -222,6 +228,7 @@ class CourseInfoGrabbing {
             throw new Error('网络错误');
           }
           if (response.data.indexOf('ok') !== -1) {
+            // TODO: 抢课成功后的动作，包括实现 windows/Mac 弹窗提醒等
             needRemoveIndex.push(courseIndex);
             this.course_pool[courseIndex].poll_state = PollState.Success;
           } else {

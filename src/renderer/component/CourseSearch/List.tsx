@@ -2,10 +2,10 @@
  * @Author: holakk
  * @Date: 2021-09-16 10:35:08
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 15:38:25
+ * @LastEditTime: 2021-09-19 18:41:02
  * @Description: file content
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { Table } from 'antd';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { cloneDeep } from 'lodash';
@@ -31,6 +31,7 @@ export function CourseSearchList() {
     ) {
       return;
     }
+    // TODO: 需要实现点击影响其他属性的功能，通过控制其他课程（Results里）的 course_unable 实现，目前需要等待学习教务系统实现方式
     const newRecord = cloneDeep(record);
     newRecord.course_selected = !record.course_selected;
     const newResults = cloneDeep(results);
