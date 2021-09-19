@@ -2,51 +2,58 @@
  * @Author: holakk
  * @Date: 2021-09-16 10:35:08
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-18 21:09:50
+ * @LastEditTime: 2021-09-19 15:38:25
  * @Description: file content
  */
 import React, { useState } from 'react';
 import { Table } from 'antd';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { cloneDeep } from 'lodash';
 
-import { searchResults, selectCourses } from '../../node/stateMange';
+import {
+  searchResults,
+  selectCourses,
+  coursePool,
+} from '../../node/stateMange';
 import { Course } from '../../node/baseGen';
 
 const { Column, ColumnGroup } = Table;
 
 export function CourseSearchList() {
-  const results = useRecoilValue(searchResults);
-  const [aims, setAims] = useRecoilState(selectCourses);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedRowKeys, setSelectedRowKeys] = useState([] as any[]);
+  const [results, setResults] = useRecoilState(searchResults);
+  const aims = useRecoilValue(selectCourses);
+  const pool = useRecoilValue(coursePool);
 
   const selectRow = (record: Course) => {
-    const selectedCourses = [...aims];
-    const mayIndex = selectedCourses.findIndex(
-      (element) => element.key === record.key
-    );
-    if (mayIndex >= 0) {
-      selectedCourses.splice(mayIndex, 1);
-    } else {
-      selectedCourses.push(record);
+    if (
+      record.course_unable === true ||
+      pool.filter((element) => element.key === record.key).length !== 0
+    ) {
+      return;
     }
-    setAims(selectedCourses);
-    setSelectedRowKeys(selectedCourses.map((value) => value.key));
+    const newRecord = cloneDeep(record);
+    newRecord.course_selected = !record.course_selected;
+    const newResults = cloneDeep(results);
+    // 必然可寻
+    const mayIndex = newResults.findIndex(
+      (element) => element.key === newRecord.key
+    );
+    newResults[mayIndex] = newRecord;
+    setResults(newResults);
   };
   return (
     <Table
       dataSource={results}
       rowSelection={{
-        selectedRowKeys,
-        onChange: (selectedRowKeys_) => {
-          setSelectedRowKeys(selectedRowKeys_);
+        selectedRowKeys: aims.map((value) => value.key),
+        onSelect: (record) => {
+          selectRow(record);
         },
-        // getCheckboxProps: (record) => ({
-        //   // TODO:添加课程禁选的条件
-        //   disabled: record.name === 'Disabled User',
-        //   // Column configuration not to be checked
-        //   name: record.name,
-        // }),
+        getCheckboxProps: (record) => ({
+          disabled:
+            record.course_unable === true ||
+            pool.filter((element) => element.key === record.key).length !== 0,
+        }),
       }}
       onRow={(record) => ({
         onClick: () => {
