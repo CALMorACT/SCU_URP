@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-05-30 20:40:09
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-18 22:04:28
+ * @LastEditTime: 2021-09-19 12:19:25
  * @Description: file content
  */
 import axios from 'axios';
@@ -33,6 +33,8 @@ export interface Course {
   course_classroom: string[];
   course_college: string;
   course_limit: string;
+  course_unable: boolean;
+  course_selected: boolean;
 }
 
 export enum PollState {
