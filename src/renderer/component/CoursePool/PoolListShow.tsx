@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-03-18 22:08:44
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-18 22:43:27
+ * @LastEditTime: 2021-09-19 15:29:55
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\CoursePool\PoolListShow.js
  */
 import React from 'react';
@@ -93,11 +93,11 @@ export function CoursePoolListShow() {
             }}
           />
         </ColumnGroup>
-        <Column title="轮询次数" dataIndex="poll_count" key="poll_count" />
+        <Column title="轮询次数" dataIndex="poll_time" key="poll_time" />
         <Column
           title="抢课结果"
-          dataIndex="poll_result"
-          key="poll_result"
+          dataIndex="poll_state"
+          key="poll_state"
           render={(text) => {
             switch (text) {
               case PollState.NoCourse:
