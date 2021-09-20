@@ -8,7 +8,6 @@
 
 import axios from 'axios';
 import qs from 'qs';
-import { ipcRenderer } from 'electron';
 // import { ContactsFilled } from '@ant-design/icons';
 import CryptoJS from 'crypto-js';
 
@@ -68,7 +67,7 @@ export async function login(
     if (response.data.indexOf('成绩查询') !== -1) {
       // eslint-disable-next-line no-console
       console.log('登录正常');
-      ipcRenderer.send('store_cookie', [stuNum, stuPassword]);
+      window.electron.ipcRenderer.send('store_cookie', [stuNum, stuPassword]);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-02-10 17:23:58
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-16 23:49:11
+ * @LastEditTime: 2021-09-19 21:19:07
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\courseList.js
  */
 import React from 'react';

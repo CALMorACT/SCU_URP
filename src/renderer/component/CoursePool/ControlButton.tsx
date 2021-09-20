@@ -2,17 +2,22 @@
  * @Author: holakk
  * @Date: 2021-03-18 22:09:21
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 18:02:03
+ * @LastEditTime: 2021-09-19 21:26:20
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\CoursePool\ControlPoll.js
  */
 import React from 'react';
 import { Button, message } from 'antd';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { coursePicker, PoolStatus } from '../../node/URPS_pickCourse';
-import { isPolling, coursePool } from '../../node/stateMange';
+import {
+  isPolling,
+  coursePool,
+  isCourseSelectingTime,
+} from '../../node/stateMange';
 
 export function StartCoursePoolButton() {
+  const isTime = useRecoilValue(isCourseSelectingTime);
   const [pollS, setPollS] = useRecoilState(isPolling);
   const [pool, setPool] = useRecoilState(coursePool);
   const startPolling = async () => {
@@ -33,7 +38,7 @@ export function StartCoursePoolButton() {
       shape="round"
       size="large"
       onClick={startPolling}
-      disabled={pool === []}
+      disabled={pool === [] || !isTime}
     >
       开始抢课
     </Button>

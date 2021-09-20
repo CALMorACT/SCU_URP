@@ -1,3 +1,10 @@
+<!--
+ * @Author: holakk
+ * @Date: 2021-09-14 21:44:51
+ * @LastEditors: holakk
+ * @LastEditTime: 2021-09-20 12:11:00
+ * @Description: file content
+-->
 <!DOCTYPE html>
 <html>
   <head>
@@ -8,10 +15,10 @@
     <div id="root"></div>
   </body>
   <script>
-    // window.electron.ipcRenderer.once('ipc-example', (arg) => {
-    //   // eslint-disable-next-line no-console
-    //   console.log(arg);
-    // });
+    window.electron.ipcRenderer.once('ipc-example', (arg) => {
+      // eslint-disable-next-line no-console
+      console.log(arg);
+    });
 
     window.electron.ipcRenderer.myPing();
   </script>

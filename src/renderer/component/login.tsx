@@ -3,29 +3,28 @@
  * @Author: holakk
  * @Date: 2021-02-03 18:25:14
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-16 10:48:59
+ * @LastEditTime: 2021-09-20 11:50:38
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\login.js
  */
 
-import React, { useState } from 'react';
-import { Form, Input, Button, Tooltip } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Form, Input, Button, Tooltip, message } from 'antd';
 import {
   UserOutlined,
   LockOutlined,
   VerifiedOutlined,
 } from '@ant-design/icons';
-import { ipcRenderer } from 'electron';
-import { storeUser } from '../node/baseGen';
 
 import { refreshVerifyCode, login } from '../node/URPS_login';
 
-import '../App.global.css';
 import styles from '../css/login.css';
 
 // 验证码组件
 function VerifyCode() {
   const [imgSrc, setImgSrc] = useState('');
-  useState(() => refreshVerifyCode(setImgSrc));
+  useEffect(() => {
+    refreshVerifyCode(setImgSrc);
+  }, []);
   return (
     <Tooltip title="点击刷新" color="blue" key="blue" placement="rightTop">
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
@@ -41,36 +40,45 @@ function VerifyCode() {
 }
 // 登录组件
 function NormalLoginForm(props: {
-  // eslint-disable-next-line react/no-unused-prop-types
-  location: { state: { from: { pathname: string } | { pathname: string } } };
   history: { replace: (arg0: string) => void };
 }) {
-  ipcRenderer.send('test_cookie');
-  const [ifCookieUsed, setIfCookieUsed] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userPass, setUserPass] = useState('');
+  useEffect(() => {
+    window.electron.ipcRenderer.send('test_cookie');
+    window.electron.ipcRenderer.on('test_cookie_reply', (_, arg) => {
+      // eslint-disable-next-line no-console
+      console.log(`ifCookieUsed: ${arg[0]}`);
+      if (arg[0]) {
+        message.success('自动登录', 1);
+        props.history.replace('/mainPanel');
+      } else {
+        setUserName(arg[1]);
+        setUserPass(arg[2]);
+      }
+    });
+  }, [props, setUserName, setUserPass]);
   const validateMessages = {
     string: {
       // eslint-disable-next-line no-template-curly-in-string
       len: '${name}长度需为${len}',
     },
   };
-  ipcRenderer.on('test_cookie_reply', (_, arg) => {
-    setIfCookieUsed(arg);
-  });
-  // eslint-disable-next-line no-console
-  console.log(`ifCookieUsed: ${ifCookieUsed}`);
-  if (ifCookieUsed) {
-    props.history.replace('/mainPanel');
-    return <div />;
-  }
   return (
     <div style={{ margin: 'auto' }}>
       <Form
         name="normal_login"
         className={styles['login-form']}
-        initialValues={{
-          stu_num: storeUser.get('user_info.user_name'),
-          password: storeUser.get('user_info.user_pass'),
-        }}
+        fields={[
+          {
+            name: 'stu_num',
+            value: userName,
+          },
+          {
+            name: 'password',
+            value: userPass,
+          },
+        ]}
         onFinish={(values) => {
           login(values.stu_num, values.password, values.verify_code);
           props.history.replace('/mainPanel');

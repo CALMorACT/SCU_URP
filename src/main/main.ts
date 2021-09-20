@@ -82,10 +82,8 @@ const createWindow = async () => {
     height: 728,
     icon: getAssetPath('icon.png'),
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
       webSecurity: false,
-      // preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
@@ -161,6 +159,8 @@ ipcMain.on('store_cookie', (_, args) => {
 
 ipcMain.on('test_cookie', (event) => {
   const userCookies: Electron.Cookie[] = store.get('user_info.cookie', []);
+  const userName: string = store.get('user_info.user_name', '');
+  const userPass: string = store.get('user_info.user_pass', '');
   const cookieLogin = userCookies.filter(
     (value: Electron.Cookie) => value.name === 'JSESSIONID'
   );
@@ -201,14 +201,10 @@ ipcMain.on('test_cookie', (event) => {
               })
             );
           });
-          // mainWindow?.webContents.session.cookies.get({}).then((cookies) => {
-          //   console.log(cookies);
-          //   return 0;
-          // });
-          event.reply('test_cookie_reply', true);
+          event.reply('test_cookie_reply', [true]);
         } else {
           console.log('cookie over');
-          event.reply('test_cookie_reply', false);
+          event.reply('test_cookie_reply', [false, userName, userPass]);
         }
         return 0;
       })

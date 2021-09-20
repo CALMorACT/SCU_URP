@@ -2,13 +2,10 @@
  * @Author: holakk
  * @Date: 2021-05-30 20:40:09
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 12:19:25
+ * @LastEditTime: 2021-09-19 23:51:29
  * @Description: file content
  */
 import axios from 'axios';
-import { store } from '../../main/util';
-
-export const storeUser = store;
 
 export const axiosURPS = axios.create({
   baseURL: 'http://zhjw.scu.edu.cn',
@@ -62,4 +59,4 @@ export const urls = {
   login_verify_code: 'http://zhjw.scu.edu.cn/img/captcha.jpg',
 };
 
-export default { storeUser, axiosURPS, urls };
+export default { axiosURPS, urls };

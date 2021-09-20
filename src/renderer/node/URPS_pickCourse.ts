@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-02-03 22:14:31
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 21:02:28
+ * @LastEditTime: 2021-09-19 21:29:29
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\node\URPS_pickCourse.js
  */
 import qs from 'qs';
@@ -61,7 +61,6 @@ class CourseInfoGrabbing {
         ) {
           const regexIn = /欢迎您.<\/small>\s+(.+)/gm;
           const regResult = regexIn.exec(response.data);
-          console.log(regResult);
           if (regResult) {
             [, this.user_name] = regResult;
           } else {
@@ -87,7 +86,6 @@ class CourseInfoGrabbing {
     const indexResponse = await this.axios_URPS.get(this.urls.All_course_index);
     // TODO: 验证健康性，利用这个过程判断是否选课时间以及提供课程查询服务
     if (indexResponse.data.indexOf('对不起') !== -1) {
-      message.warn('当前非选课阶段，仅可以查询或加入课程池准备抢');
       return [false, indexResponse];
     }
     if (indexResponse.data.indexOf('自由选课') !== -1) {

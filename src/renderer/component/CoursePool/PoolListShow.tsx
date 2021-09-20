@@ -2,12 +2,12 @@
  * @Author: holakk
  * @Date: 2021-03-18 22:08:44
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 15:29:55
+ * @LastEditTime: 2021-09-19 21:44:06
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\CoursePool\PoolListShow.js
  */
 import React from 'react';
 import { Table, Button } from 'antd';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 
 import { PollState } from '../../node/baseGen';
 import { coursePool } from '../../node/stateMange';
@@ -17,7 +17,6 @@ const { Column, ColumnGroup } = Table;
 // 显示抢课池中课程
 export function CoursePoolListShow() {
   const Pool = useRecoilValue(coursePool);
-  console.log(Pool);
   return (
     <div>
       <Table

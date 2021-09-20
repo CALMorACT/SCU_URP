@@ -2,14 +2,14 @@
  * @Author: holakk
  * @Date: 2021-09-16 10:34:13
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 16:19:01
+ * @LastEditTime: 2021-09-19 22:19:03
  * @Description: file content
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input, message } from 'antd';
 import { useRecoilState } from 'recoil';
 
-import { searchResults } from '../../node/stateMange';
+import { searchResults, isCourseSelectingTime } from '../../node/stateMange';
 import { Course } from '../../node/baseGen';
 import { coursePicker } from '../../node/URPS_pickCourse';
 
@@ -105,6 +105,22 @@ function getSearchResult(
 
 export function CourseSearchArea() {
   const [, setResults] = useRecoilState(searchResults);
+  const [, setIsTime] = useRecoilState(isCourseSelectingTime);
+  useEffect(() => {
+    coursePicker
+      .getIsSelectingTime()
+      .then(([n]) => {
+        setIsTime(n);
+        if (!n) {
+          message.warn('当前非选课阶段，仅可以查询或加入课程池准备抢', 1);
+        }
+        return 0;
+      })
+      .catch((error) => {
+        message.error(`进入选课主页错误: ${error}`);
+      });
+  }, [setIsTime]);
+
   return (
     <Search
       allowClear
