@@ -2,23 +2,26 @@
  * @Author: holakk
  * @Date: 2021-09-14 21:44:51
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-16 10:26:59
+ * @LastEditTime: 2022-01-02 23:24:27
  * @Description: file content
  */
 import React from 'react';
-import { MemoryRouter as Router, Route } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 import Login from './component/Login';
 import MainPanel from './component/MainPanel';
-import './App.global.css';
+import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import icon from '../../assets/icon.svg';
+import './App.css';
 
 export default function App() {
   return (
     <RecoilRoot>
-      <Router>
+    <Router>
+      <Routes>
         <Route exact path="/" component={Login} />
         <Route path="/mainPanel" component={MainPanel} />
-      </Router>
+      </Routes>
+    </Router>
     </RecoilRoot>
   );
 }
