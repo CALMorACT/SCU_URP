@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-05-30 20:40:09
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-19 23:51:29
+ * @LastEditTime: 2021-09-21 18:30:00
  * @Description: file content
  */
 import axios from 'axios';
@@ -10,11 +10,11 @@ import axios from 'axios';
 export const axiosURPS = axios.create({
   baseURL: 'http://zhjw.scu.edu.cn',
   headers: {
-    'Upgrade-Insecure-Requests': '1',
     'Content-Type': 'application/x-www-form-urlencoded',
-    Accept:
-      'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    // Accept:
+    //   'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
   },
+  withCredentials: true,
 });
 
 export interface Course {

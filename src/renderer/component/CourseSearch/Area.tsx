@@ -117,7 +117,7 @@ export function CourseSearchArea() {
         return 0;
       })
       .catch((error) => {
-        message.error(`进入选课主页错误: ${error}`);
+        message.error(`进入选课主页错误: ${error}`, 1);
       });
   }, [setIsTime]);
 

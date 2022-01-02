@@ -88,6 +88,14 @@ export default merge(baseConfig, {
               sourceMap: true,
             },
           },
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [require('tailwindcss'), require('autoprefixer')],
+              },
+            },
+          },
         ],
       },
       {
@@ -95,6 +103,9 @@ export default merge(baseConfig, {
         use: [
           {
             loader: 'style-loader',
+          },
+          {
+            loader: '@teamsupercell/typings-for-css-modules-loader',
           },
           {
             loader: 'css-loader',

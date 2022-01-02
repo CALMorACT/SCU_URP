@@ -2,7 +2,7 @@
  * @Author: holakk
  * @Date: 2021-02-06 17:30:37
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-17 10:58:28
+ * @LastEditTime: 2021-09-20 19:58:56
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\node\URPS_login.js
  */
 
@@ -46,7 +46,7 @@ export async function login(
   stuNum: string,
   stuPassword: string,
   verifyCode: string
-) {
+): Promise<boolean> {
   const encryptPasswordMd5 = CryptoJS.MD5(stuPassword).toString(
     CryptoJS.enc.Hex
   );
@@ -59,19 +59,22 @@ export async function login(
   try {
     const response = await axiosURPS.post(
       urls.login_submit,
-      qs.stringify(postData)
+      qs.stringify(postData),
+      { maxRedirects: 0 }
     );
     if (response.data.indexOf('验证码错误') !== -1) {
-      throw new Error('验证码输入错误');
+      return false;
     }
     if (response.data.indexOf('成绩查询') !== -1) {
       // eslint-disable-next-line no-console
       console.log('登录正常');
       window.electron.ipcRenderer.send('store_cookie', [stuNum, stuPassword]);
+      return true;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    throw new Error(`无法登陆${error.message}`);
+    throw new Error(`无法登陆: ${error.message}`);
   }
+  return false;
 }
 export default { login, refreshVerifyCode };

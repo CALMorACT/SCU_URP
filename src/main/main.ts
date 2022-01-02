@@ -86,9 +86,24 @@ const createWindow = async () => {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
+  // FIXME: I can' t solve this problem for conflicts between withCredentials and Access-Control-Allow-Origin
+  // some ideas I have:
+  //            use onSendHeaders to sent cookie not withCredentials
+  // or         use Access-Control-Allow-Origin with appoint the domain for dev
+  // or         use Proxy to fix the problem
 
+  // I use the easiest method but not security (webSecurity: false). So stupid but effective
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-
+  mainWindow.webContents.session.webRequest.onHeadersReceived(
+    (details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
+  );
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/main/docs/api/browser-window.md#using-ready-to-show-event
   mainWindow.webContents.on('did-finish-load', () => {

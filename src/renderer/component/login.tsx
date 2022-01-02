@@ -3,7 +3,7 @@
  * @Author: holakk
  * @Date: 2021-02-03 18:25:14
  * @LastEditors: holakk
- * @LastEditTime: 2021-09-20 11:50:38
+ * @LastEditTime: 2021-10-11 15:21:58
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\login.js
  */
 
@@ -20,18 +20,18 @@ import { refreshVerifyCode, login } from '../node/URPS_login';
 import styles from '../css/login.css';
 
 // 验证码组件
-function VerifyCode() {
-  const [imgSrc, setImgSrc] = useState('');
+function VerifyCode(props: { setImgSrc: (n: string) => void; imgSrc: string }) {
+  const { imgSrc, setImgSrc } = props;
   useEffect(() => {
     refreshVerifyCode(setImgSrc);
-  }, []);
+  }, [setImgSrc]);
   return (
-    <Tooltip title="点击刷新" color="blue" key="blue" placement="rightTop">
+    <Tooltip title="点击刷新" color="blue" key="blue" placement="bottomRight">
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <img
         src={imgSrc}
         onClick={refreshVerifyCode}
-        className={styles['verify-code-img']}
+        className={`${styles['verify-code-img']} inline-block`}
         id="verify-code-img"
         alt="Verify-Code"
       />
@@ -42,8 +42,8 @@ function VerifyCode() {
 function NormalLoginForm(props: {
   history: { replace: (arg0: string) => void };
 }) {
-  const [userName, setUserName] = useState('');
-  const [userPass, setUserPass] = useState('');
+  const [form] = Form.useForm();
+  const [imgSrc, setImgSrc] = useState('');
   useEffect(() => {
     window.electron.ipcRenderer.send('test_cookie');
     window.electron.ipcRenderer.on('test_cookie_reply', (_, arg) => {
@@ -53,11 +53,13 @@ function NormalLoginForm(props: {
         message.success('自动登录', 1);
         props.history.replace('/mainPanel');
       } else {
-        setUserName(arg[1]);
-        setUserPass(arg[2]);
+        form.setFieldsValue({
+          stu_num: arg[1],
+          password: arg[2],
+        });
       }
     });
-  }, [props, setUserName, setUserPass]);
+  }, [form, props]);
   const validateMessages = {
     string: {
       // eslint-disable-next-line no-template-curly-in-string
@@ -65,23 +67,26 @@ function NormalLoginForm(props: {
     },
   };
   return (
-    <div style={{ margin: 'auto' }}>
+    <div
+      className={`${styles['login-form']} p-6 max-w-sm mx-auto bg-blue-50 rounded-xl shadow-md flex items-center space-x-4`}
+      style={{ margin: 'auto' }}
+    >
       <Form
         name="normal_login"
-        className={styles['login-form']}
-        fields={[
-          {
-            name: 'stu_num',
-            value: userName,
-          },
-          {
-            name: 'password',
-            value: userPass,
-          },
-        ]}
         onFinish={(values) => {
-          login(values.stu_num, values.password, values.verify_code);
-          props.history.replace('/mainPanel');
+          login(values.stu_num, values.password, values.verify_code)
+            .then((isRight) => {
+              if (isRight) {
+                props.history.replace('/mainPanel');
+                return 0;
+              }
+              message.error('验证码输入错误', 1);
+              refreshVerifyCode(setImgSrc);
+              return 1;
+            })
+            .catch((error) => {
+              console.log(`${error}`);
+            });
         }}
         validateMessages={validateMessages}
       >
@@ -119,27 +124,29 @@ function NormalLoginForm(props: {
             placeholder="密码"
           />
         </Form.Item>
-        <Form.Item
-          name="verify_code"
-          rules={[
-            {
-              required: true,
-              message: '请输入验证码',
-            },
-            {
-              type: 'string',
-              len: 4,
-            },
-          ]}
-        >
-          <Input
-            prefix={<VerifiedOutlined className="site-form-item-icon" />}
-            placeholder="验证码"
-            allowClear
-            className={styles['verify-code-input']}
-          />
+        <Form.Item name="verify_code">
+          <Form.Item
+            name="verify_code_input"
+            rules={[
+              {
+                required: true,
+                message: '请输入验证码',
+              },
+              {
+                type: 'string',
+                len: 4,
+              },
+            ]}
+          >
+            <Input
+              prefix={<VerifiedOutlined className="site-form-item-icon" />}
+              placeholder="验证码"
+              allowClear
+              className={`${styles['verify-code-input']} w-3/5`}
+            />
+          </Form.Item>
+          <VerifyCode imgSrc={imgSrc} setImgSrc={setImgSrc} />
         </Form.Item>
-        <VerifyCode />
         <Form.Item>
           <Button
             type="primary"

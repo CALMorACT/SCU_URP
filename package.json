@@ -188,6 +188,7 @@
     "@types/webpack-env": "^1.16.0",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
+    "autoprefixer": "^10.3.4",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.1.0",
     "babel-loader": "^8.2.2",
@@ -232,6 +233,8 @@
     "lint-staged": "^10.5.4",
     "mini-css-extract-plugin": "^1.6.0",
     "opencollective-postinstall": "^2.0.3",
+    "postcss": "^8.3.6",
+    "postcss-loader": "^6.1.1",
     "prettier": "^2.2.1",
     "react-refresh": "^0.10.0",
     "react-test-renderer": "^17.0.2",
@@ -239,6 +242,7 @@
     "sass": "^1.32.12",
     "sass-loader": "^11.0.1",
     "style-loader": "^2.0.0",
+    "tailwindcss": "^2.2.15",
     "terser-webpack-plugin": "^5.1.1",
     "typescript": "^4.2.4",
     "url-loader": "^4.1.0",
@@ -274,6 +278,12 @@
     "url": "https://opencollective.com/electron-react-boilerplate-594"
   },
   "browserslist": [],
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {},
+      "autoprefixer": {}
+    }
+  },
   "prettier": {
     "overrides": [
       {
