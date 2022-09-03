@@ -7,7 +7,7 @@
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\login.js
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, Input, Button, Tooltip, message } from 'antd';
 import {
   UserOutlined,

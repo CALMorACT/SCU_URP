@@ -5,7 +5,6 @@
  * @LastEditTime: 2021-09-17 10:55:55
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\aimsCourseList.js
  */
-import React from 'react';
 import { coursePicker } from '../node/URPS_pickCourse';
 import { CoursePoolInfo } from './CoursePool/InfoDescriptions';
 import { CoursePoolListShow } from './CoursePool/PoolListShow';

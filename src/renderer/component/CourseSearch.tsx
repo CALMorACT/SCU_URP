@@ -5,7 +5,6 @@
  * @LastEditTime: 2021-09-19 21:19:07
  * @FilePath: \AddUIByMe\electron_study\electron-react\src\component\courseList.js
  */
-import React from 'react';
 import { CourseSearchArea } from './CourseSearch/Area';
 import { CourseSearchList } from './CourseSearch/List';
 import { CourseSearchButton } from './CourseSearch/Button';
